@@ -1,0 +1,1 @@
+String geminiAPIKEY ="AIzaSyCng-QpReCQFngu3-JmJHjxOjR2aYlCzFA";//حق الشات
