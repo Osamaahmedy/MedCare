@@ -1,10 +1,10 @@
 import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart'; // ✅ iOS widgets
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:my_app4/features/auth/register_page.dart';
-import 'package:my_app4/pages/madiPage2.dart';
+import 'package:my_app4/features/main/home_controller.dart';
 import '../../core/api.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,12 +15,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>(); // ✅ Form validation
+  final _formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
   bool loading = false;
   bool obscure = true;
-  String? errorMessage; // ✅ رسالة الخطأ
+  String? errorMessage;
 
   @override
   void dispose() {
@@ -30,7 +30,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> login() async {
-    // ✅ Validation قبل الإرسال
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -51,18 +50,19 @@ class _LoginPageState extends State<LoginPage> {
 
       Navigator.pushReplacement(
         context,
-        CupertinoPageRoute( // ✅ iOS-style page transition
+        CupertinoPageRoute(
           builder: (_) => MediCareApp1(
             token: response.data['token'],
-            name: response.data['name'],
+            name: response.data['patient']['name'], // ✅ التعديل الوحيد
           ),
         ),
       );
     } on DioException catch (e) {
-      // ✅ معالجة أنواع الأخطاء المختلفة
       setState(() {
-        if (e.response?.statusCode == 401) {
-          errorMessage = 'Incorrect phone number or password.';
+        if (e.response?.statusCode == 404) {
+          errorMessage = 'Phone number not found.';
+        } else if (e.response?.statusCode == 401) {
+          errorMessage = 'Incorrect password.';
         } else if (e.response?.statusCode == 422) {
           errorMessage = 'Please check your input and try again.';
         } else if (e.type == DioExceptionType.connectionTimeout ||
@@ -73,15 +73,12 @@ class _LoginPageState extends State<LoginPage> {
         }
       });
     } catch (_) {
-      setState(() {
-        errorMessage = 'Unexpected error. Please try again.';
-      });
+      setState(() => errorMessage = 'Unexpected error. Please try again.');
     } finally {
       if (mounted) setState(() => loading = false);
     }
   }
 
-  // ✅ iOS-style TextField
   Widget _buildField({
     required TextEditingController controller,
     required String placeholder,
@@ -96,10 +93,7 @@ class _LoginPageState extends State<LoginPage> {
       obscureText: obscureText,
       validator: validator,
       keyboardType: keyboardType,
-      style: const TextStyle(
-        fontSize: 16,
-        color: Color(0xFF1A3644),
-      ),
+      style: const TextStyle(fontSize: 16, color: Color(0xFF1A3644)),
       decoration: InputDecoration(
         hintText: placeholder,
         hintStyle: TextStyle(
@@ -110,7 +104,6 @@ class _LoginPageState extends State<LoginPage> {
         suffixIcon: suffixIcon,
         filled: true,
         fillColor: Colors.white.withOpacity(0.75),
-        // ✅ iOS border style — هادئ وبسيط
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(
@@ -119,10 +112,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFF3A7A8A),
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: Color(0xFF3A7A8A), width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -165,7 +155,6 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const SizedBox(height: 60),
 
-                  // ✅ شعار + اسم التطبيق في الأعلى
                   Column(
                     children: [
                       Container(
@@ -211,7 +200,6 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 40),
 
-                  // ✅ Glass card
                   ClipRRect(
                     borderRadius: BorderRadius.circular(28),
                     child: BackdropFilter(
@@ -246,7 +234,6 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             const SizedBox(height: 24),
 
-                            // ✅ حقل الهاتف
                             _buildField(
                               controller: phoneController,
                               placeholder: 'Phone Number',
@@ -265,7 +252,6 @@ class _LoginPageState extends State<LoginPage> {
 
                             const SizedBox(height: 16),
 
-                            // ✅ حقل كلمة المرور
                             _buildField(
                               controller: passwordController,
                               placeholder: 'Password',
@@ -293,7 +279,6 @@ class _LoginPageState extends State<LoginPage> {
                               },
                             ),
 
-                            // ✅ رسالة الخطأ من الـ API
                             if (errorMessage != null) ...[
                               const SizedBox(height: 14),
                               Container(
@@ -334,11 +319,10 @@ class _LoginPageState extends State<LoginPage> {
 
                             const SizedBox(height: 28),
 
-                            // ✅ زر Login
                             SizedBox(
                               width: double.infinity,
                               height: 52,
-                              child: CupertinoButton( // ✅ iOS button
+                              child: CupertinoButton(
                                 color: const Color(0xFF1A3644),
                                 borderRadius: BorderRadius.circular(16),
                                 onPressed: loading ? null : login,
@@ -359,7 +343,6 @@ class _LoginPageState extends State<LoginPage> {
 
                             const SizedBox(height: 16),
 
-                            // ✅ رابط إنشاء حساب
                             Center(
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
